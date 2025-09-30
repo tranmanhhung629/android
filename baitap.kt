@@ -1,95 +1,99 @@
 import kotlin.math.abs
 
-// Class Fraction để biểu diễn phân số
-class Fraction(var numerator: Int, var denominator: Int) {
+class PhanSo(var tu: Int, var mau: Int) {
 
-    init {
-        require(denominator != 0) { "Denominator cannot be zero" }
-    }
-
-    // Nhập phân số từ bàn phím
-    fun input() {
+    // Hàm nhập phân số từ bàn phím
+    fun nhap() {
         do {
-            print("Enter numerator: ")
-            numerator = readln().toInt()
-            print("Enter denominator: ")
-            denominator = readln().toInt()
-        } while (denominator == 0) // Lặp lại nếu nhập mẫu = 0
+            print("Nhập tử số: ")
+            tu = readln().toInt()
+            print("Nhập mẫu số: ")
+            mau = readln().toInt()
+        } while (tu == 0 || mau == 0) // yêu cầu nhập lại nếu tử hoặc mẫu = 0
     }
 
-    // In phân số ra màn hình
-    fun printFraction() {
-        println("$numerator/$denominator")
+    // Hàm in phân số
+    fun inPhanSo() {
+        println("$tu/$mau")
     }
 
-    // Rút gọn phân số về dạng tối giản
-    fun simplify() {
-        val gcdValue = gcd(abs(numerator), abs(denominator)) // tìm ước chung lớn nhất
-        numerator /= gcdValue
-        denominator /= gcdValue
-        if (denominator < 0) { // đảm bảo mẫu số luôn dương
-            numerator = -numerator
-            denominator = -denominator
+    // Hàm tối giản phân số
+    fun toiGian() {
+        val ucln = gcd(abs(tu), abs(mau))
+        tu /= ucln
+        mau /= ucln
+        if (mau < 0) { // đổi dấu để mẫu dương
+            tu = -tu
+            mau = -mau
         }
     }
 
-    // So sánh 2 phân số
-    fun compare(other: Fraction): Int {
-        val left = numerator * other.denominator
-        val right = other.numerator * denominator
+    // Hàm so sánh với 1 phân số khác
+    fun soSanh(ps: PhanSo): Int {
+        val a = tu * ps.mau
+        val b = ps.tu * mau
         return when {
-            left < right -> -1
-            left == right -> 0
+            a < b -> -1
+            a == b -> 0
             else -> 1
         }
     }
-    // Cộng 2 phân số
-    fun add(other: Fraction): Fraction {
-        val newNumerator = numerator * other.denominator + other.numerator * denominator
-        val newDenominator = denominator * other.denominator
-        val result = Fraction(newNumerator, newDenominator)
-        result.simplify() // luôn rút gọn sau khi cộng
-        return result
+
+    // Hàm cộng 2 phân số
+    fun cong(ps: PhanSo): PhanSo {
+        val tuMoi = tu * ps.mau + ps.tu * mau
+        val mauMoi = mau * ps.mau
+        val kq = PhanSo(tuMoi, mauMoi)
+        kq.toiGian()
+        return kq
     }
-    // Hàm tính ước chung lớn nhất (GCD) bằng đệ quy
+
+    // Hàm tìm ước chung lớn nhất (dùng đệ quy)
     private fun gcd(a: Int, b: Int): Int {
         return if (b == 0) a else gcd(b, a % b)
     }
 }
+
 fun main() {
-    print("Enter number of fractions: ")
+    print("Nhập số lượng phân số: ")
     val n = readln().toInt()
-    val fractions = Array(n) { Fraction(1, 1) }
+    val arr = Array(n) { PhanSo(1, 1) }
 
     // Nhập mảng phân số
-    for (i in fractions.indices) {
-        println("Enter fraction ${i + 1}:")
-        fractions[i].input()
+    for (i in arr.indices) {
+        println("Nhập phân số thứ ${i + 1}:")
+        arr[i].nhap()
     }
 
-    println("\nFractions you entered:")
-    fractions.forEach { it.printFraction() }
+    println("\nMảng phân số vừa nhập:")
+    for (ps in arr) ps.inPhanSo()
 
-    println("\nFractions after simplification:")
-    fractions.forEach {
-        it.simplify()
-        it.printFraction()
+    println("\nMảng sau khi tối giản:")
+    for (ps in arr) {
+        ps.toiGian()
+        ps.inPhanSo()
     }
 
-    // Tính tổng các phân số
-    var sum = Fraction(0, 1)
-    for (f in fractions) {
-        sum = sum.add(f)
+    // Tính tổng
+    var tong = PhanSo(0, 1)
+    for (ps in arr) {
+        tong = tong.cong(ps)
     }
-    println("\nSum of fractions = ")
-    sum.printFraction()
+    println("\nTổng các phân số = ")
+    tong.inPhanSo()
 
     // Tìm phân số lớn nhất
-    val maxFraction = fractions.maxWithOrNull { a, b -> a.compare(b) }!!
-    print("\nLargest fraction is: ")
-    maxFraction.printFraction()
+    var maxPS = arr[0]
+    for (ps in arr) {
+        if (ps.soSanh(maxPS) == 1) {
+            maxPS = ps
+        }
+    }
+    print("\nPhân số lớn nhất là: ")
+    maxPS.inPhanSo()
 
-    // Sắp xếp mảng giảm dần
-    println("\nFractions sorted in descending order:")
-    fractions.sortedWith { a, b -> b.compare(a) }.forEach { it.printFraction() }
+    // Sắp xếp giảm dần (dùng sort với compare)
+    println("\nMảng sau khi sắp xếp giảm dần:")
+    val arrSorted = arr.sortedWith { a, b -> b.soSanh(a) }
+    for (ps in arrSorted) ps.inPhanSo()
 }
